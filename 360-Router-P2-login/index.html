@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   
   
+  <meta name="description" content="流量分析
+由于某些需求，需要伪造个登陆过程，然后就花了点时间分析了下过程。由于我拿到的是板子而且是开发板，我拥有 telnet 接口。于是我 telnet 上去用 tcpdump 抓取了流量。tcpdump -i any -w target.cap
+为什么我不在本地抓本地 web 登录的流量呢？ 因">
+  
 
   
   
@@ -11,15 +15,25 @@
   
   
   
-  <title>喵神‘s Blog</title>
+  <title>360 路由器 P2 登陆验证分析 | 喵神‘s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="喵神‘s Blog">
-<meta property="og:url" content="https://killer-meow.github.io/index.html">
+  <meta name="description" content="流量分析 由于某些需求，需要伪造个登陆过程，然后就花了点时间分析了下过程。由于我拿到的是板子而且是开发板，我拥有 telnet 接口。于是我 telnet 上去用 tcpdump 抓取了流量。tcpdump -i any -w target.cap 为什么我不在本地抓本地 web 登录的流量呢？ 因为我那个时候在做 App 一些功能测试。我需要抓取全部经过路由器的流量。然后我需要把 cap 文件拿">
+<meta name="keywords" content="router">
+<meta property="og:type" content="article">
+<meta property="og:title" content="360 路由器 P2 登陆验证分析">
+<meta property="og:url" content="https://killer-meow.github.io/360-Router-P2-login/index.html">
 <meta property="og:site_name" content="喵神‘s Blog">
+<meta property="og:description" content="流量分析 由于某些需求，需要伪造个登陆过程，然后就花了点时间分析了下过程。由于我拿到的是板子而且是开发板，我拥有 telnet 接口。于是我 telnet 上去用 tcpdump 抓取了流量。tcpdump -i any -w target.cap 为什么我不在本地抓本地 web 登录的流量呢？ 因为我那个时候在做 App 一些功能测试。我需要抓取全部经过路由器的流量。然后我需要把 cap 文件拿">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://blog-1252049492.cos.ap-hongkong.myqcloud.com/img/20180911174710.png">
+<meta property="og:image" content="https://blog-1252049492.cos.ap-hongkong.myqcloud.com/img/20180911174806.png">
+<meta property="og:image" content="https://blog-1252049492.cos.ap-hongkong.myqcloud.com/img/20180911175940.png">
+<meta property="og:image" content="https://blog-1252049492.cos.ap-hongkong.myqcloud.com/img/20180911180642.png">
+<meta property="og:updated_time" content="2019-01-29T08:27:31.468Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="喵神‘s Blog">
+<meta name="twitter:title" content="360 路由器 P2 登陆验证分析">
+<meta name="twitter:description" content="流量分析 由于某些需求，需要伪造个登陆过程，然后就花了点时间分析了下过程。由于我拿到的是板子而且是开发板，我拥有 telnet 接口。于是我 telnet 上去用 tcpdump 抓取了流量。tcpdump -i any -w target.cap 为什么我不在本地抓本地 web 登录的流量呢？ 因为我那个时候在做 App 一些功能测试。我需要抓取全部经过路由器的流量。然后我需要把 cap 文件拿">
+<meta name="twitter:image" content="https://blog-1252049492.cos.ap-hongkong.myqcloud.com/img/20180911174710.png">
   
   
     <link rel="icon" href="/css/images/favicon.ico">
@@ -60,17 +74,15 @@
 </header>
 
       <div id="main" class="wrapper">
-        <div id="primary" class="site-content"><div id="content" role="main">
-  
-    <article id="post-360-Router-P2-login" class="post-360-Router-P2-login post type-post status-publish format-standard hentry">
+        <div id="primary" class="site-content"><div id="content" role="main"><article id="post-360-Router-P2-login" class="post-360-Router-P2-login post type-post status-publish format-standard hentry">
     <!---->
 
       <header class="entry-header">
         
         
   
-    <h1 class="entry-title">
-      <a class="article-title" href="/360-Router-P2-login/">360 路由器 P2 登陆验证分析</a>
+    <h1 class="entry-title article-title">
+      360 路由器 P2 登陆验证分析
     </h1>
   
 
@@ -115,12 +127,12 @@
 </article>
 
 
+    
 
 
 
 
-  
-  
+
 
 </div></div>
         <div id="secondary" class="widget-area" role="complementary">
